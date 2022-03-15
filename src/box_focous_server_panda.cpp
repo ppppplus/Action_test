@@ -123,8 +123,9 @@ class BoxFocousAction
       first_rot = goal->first_rot;
       if(if_focous==1)
       {
-        ROS_INFO("Car %d finish approaching.", goal->car_id);
+        ROS_INFO("Car %d finish focousing.", goal->car_id);
         as_.setSucceeded();
+        ros::shutdown();
       }
     }
 
