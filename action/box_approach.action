@@ -1,0 +1,9 @@
+# Define the goal
+uint32 car_id  # Specify which dishwasher we want to use
+---
+# Define the result
+int8 first_rot
+---
+# Define a feedback message
+bool detect_flag
+bool mb_flag
