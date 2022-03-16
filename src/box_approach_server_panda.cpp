@@ -27,6 +27,7 @@ class BoxApproachAction
     ros::NodeHandle n;
     ros::Publisher cmd_pub;
     ros::Subscriber pose_sub;
+    geometry_msgs::PoseStamped::ConstPtr msg;
 
     actionlib::SimpleActionServer<action_panda::box_approachAction> as_;
     action_panda::box_approachFeedback feedback_;
@@ -124,24 +125,35 @@ class BoxApproachAction
       //   first_rot = x>0?-1:1;
       //   send_goal(x, z, rpy[1]);
       // }
+      feedback_.mb_flag = send_goal(goal_x, goal_y, goal_yaw);
     }
 
     void execute(const action_panda::box_approachGoalConstPtr& goal)
     {
-      system("roslaunch aruco_ros single.launch");
-	    pose_sub = n.subscribe<geometry_msgs::PoseStamped>("/aruco_single/pose", 1, boost::bind(&BoxApproachAction::PoseCallback,this,_1));
-      cmd_pub = n.advertise<geometry_msgs::Twist>("/panda/cmd_vel", 1);
+      //system("roslaunch aruco_ros single.launch");
+      ros::Rate loop_rate(1);
       ROS_INFO("app car_id:%d", goal->car_id);
-      // system("roslaunch segwayrmp carto.launch");
-      // system("roslaunch segwayrmp move_base_teb.launch");
-      feedback_.detect_flag = 1;
-      as_.publishFeedback(feedback_);
-      feedback_.mb_flag = send_goal(goal_x, goal_y, goal_yaw);
-      as_.publishFeedback(feedback_);
-      result_.first_rot = first_rot;
-      ROS_INFO("Car %d finish approaching.", goal->car_id);
-      as_.setSucceeded(result_);
-  
+      while (ros::ok())
+      {
+        msg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("/aruco_single/pose", ros::Duration(5));
+        if (msg)
+        {
+          BoxApproachAction::PoseCallback(msg);
+          cmd_pub = n.advertise<geometry_msgs::Twist>("/panda/cmd_vel", 1);
+          // system("roslaunch segwayrmp carto.launch");s
+          // system("roslaunch segwayrmp move_base_teb.launch");
+          feedback_.detect_flag = 1;
+          // as_.publishFeedback(feedback_);
+          as_.publishFeedback(feedback_);
+          result_.first_rot = first_rot;
+          ROS_INFO("Car %d finish approaching.", goal->car_id);
+          as_.setSucceeded(result_);
+          ros::shutdown();
+        }
+        loop_rate.sleep();
+      }
+	    // pose_sub = n.subscribe<geometry_msgs::PoseStamped>("/aruco_single/pose", 1, boost::bind(&BoxApproachAction::PoseCallback,this,_1));
+      
     }
 
 };
