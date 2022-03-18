@@ -168,7 +168,6 @@ class BoxApproachAction
 
 int main(int argc, char **argv)
 {
-	
 	  ros::init(argc, argv, "box_approach_server");
     BoxApproachAction boxapproachaction("box_approach");
     // signal(SIGINT, MySigintHandler);

@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
   roscpp
+  std_srvs
+  segwayrmp
 )
 
 ## System dependencies are found with CMake's conventions
@@ -54,11 +56,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  outside_nav_reset.srv
+)
 
 ## Generate actions in the 'action' folder
 add_action_files(
@@ -170,6 +171,9 @@ add_executable(box_focous_server_panda src/box_focous_server_panda.cpp)
 target_link_libraries( box_focous_server_panda ${catkin_LIBRARIES})
 add_dependencies(box_focous_server_panda ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
+add_executable(outside_nav_reset_server src/outside_nav_reset_server.cpp)
+target_link_libraries( outside_nav_reset_server ${catkin_LIBRARIES})
+add_dependencies(outside_nav_reset_server ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 add_executable(box_focous_server src/box_focous_server.cpp)
 target_link_libraries( box_focous_server ${catkin_LIBRARIES})
