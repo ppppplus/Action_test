@@ -9,15 +9,12 @@ import turtlesim.srv
 import smach_ros
 from smach_ros import ServiceState
 from smach_ros import SimpleActionState
-import turtle_actionlib.msg
-import turtlesim.msg
 import actionlib
 from actionlib_msgs.msg import *
 
 from action_panda.msg import box_approachAction, box_approachGoal, box_approachResult, box_approachFeedback #导入自定义动作
 from action_panda.msg import box_focousAction, box_focousGoal, box_focousResult, box_focousFeedback #导入自定义动作
 from action_panda.srv import *
-from segwayrmp.srv import *
 
 def main():
 	rospy.init_node('smach_usecase_executive')
@@ -40,6 +37,16 @@ def main():
 			reset_request = outside_nav_resetRequest()
 			reset_request.car_id = 1
 			return reset_request
+
+		def outside_nav_request_cb(userdata, request):
+			outside_nav_request = outside_navRequest()
+			outside_nav_request.car_id = 1
+			return outside_nav_request
+
+		def elevator_request_cb(userdata, request):
+			elevator_request = elevatorRequest()
+			elevator_request.car_id = 1
+			return elevator_request
 
 		def inside_nav_request_cb(userdata, request):
 			inside_nav_request = inside_navRequest()
@@ -67,15 +74,29 @@ def main():
 		# 	ServiceState('outside_nav_reset',
 		# 	outside_nav_reset,
 		# 	request_cb = outside_nav_reset_request_cb),
-		# 	transitions={'succeeded':'succeeded','aborted':'aborted','preempted':'preempted'}
+		# 	transitions={'succeeded':'OUTSIDE_NAV'}
 		# 	)
 
-		smach.StateMachine.add('INSIDE_NAV',
-			ServiceState('inside_nav',
-			inside_nav,
-			request_cb = inside_nav_request_cb),
+		smach.StateMachine.add('OUTSIDE_NAV',
+			ServiceState('outside_nav',
+			outside_nav,
+			request_cb = outside_nav_request_cb),
 			transitions={'succeeded':'succeeded','aborted':'aborted','preempted':'preempted'}
-			)
+		 	)
+
+		# smach.StateMachine.add('ELEVATOR',
+		# 	ServiceState('elevator',
+		# 	elevator,
+		# 	request_cb = elevator_request_cb),
+		# 	transitions={'succeeded':'INSIDE_NAV'}
+		# 	)
+
+		# smach.StateMachine.add('INSIDE_NAV',
+		# 	ServiceState('inside_nav',
+		# 	inside_nav,
+		# 	request_cb = inside_nav_request_cb),
+		# 	transitions={'succeeded':'succeeded','aborted':'aborted','preempted':'preempted'}
+		# 	)
 
 	# start  introspection server to use smach_viewr.p
 	sis = smach_ros.IntrospectionServer('server_name',sm_root,'/SM_ROOT')

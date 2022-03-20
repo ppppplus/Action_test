@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="turtlesim" name="turtle1" type="turtlesim_node" output="log"/>
+</launch>

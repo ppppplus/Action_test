@@ -59,6 +59,8 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(
   FILES
   outside_nav_reset.srv
+  inside_nav.srv
+  outside_nav.srv
 )
 
 ## Generate actions in the 'action' folder

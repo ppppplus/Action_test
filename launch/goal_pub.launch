@@ -1,0 +1,6 @@
+<launch>
+<arg name="robot_name" default="panda"/>
+<node name='goal_pub_node' pkg="action_panda" type="goal_pub.py" output="screen">
+    <param name="robot_name" type="string" value="$(arg robot_name)"/>
+</node>
+</launch>

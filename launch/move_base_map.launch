@@ -1,0 +1,10 @@
+<launch>
+<arg name="robot_name"  default="panda"/>
+<group ns="$(arg robot_name)">
+  <!-- Run the map server -->
+  <!-- <node name="map_server" pkg="map_server" type="map_server" args="$(find map_server)/mymap/rmp_map1.pgm my_map_resolution"/> -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find action_panda)/maps/map0305.yaml">
+    <param name="frame_id" value="$(arg robot_name)/map"/>
+  </node>
+</group>
+</launch>
