@@ -6,7 +6,7 @@ import rospy
 import actionlib  
 from actionlib_msgs.msg import *  
 from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, PoseStamped, Twist
-from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseActionResult
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseActionFeedback
 from action_panda.srv import *
 import os
 import subprocess
@@ -15,27 +15,48 @@ import math
 
 class OutsideNavServer:
 
-    def __init__(self, robot_name):
+    def __init__(self, robot_name, goal_tole):
         self.robot_name = robot_name
+        self.goal_dis2 = goal_tole**2
         self.goal_x = 5.14
-        self.goal_y = -6.5
+        self.goal_y = -6.8
         self.goal_angz = -0.7
         self.goal_w = 0.7
-        self.goal_pub = rospy.Publisher(self.robot_name + '/move_base_simple/goal', PoseStamped, queue_size = 1)
+        self.ac_move_base = actionlib.SimpleActionClient("/" + self.robot_name + "/move_base", MoveBaseAction)  
         self.cmd_vel = rospy.Publisher(self.robot_name + '/cmd_vel', Twist, queue_size=10)
         self.move_cmd = Twist()
 
         rospy.Service('/outside_nav', outside_nav, self.outside_navCallback)
+    
+    def create_geo_pose(self):
+        pose = Pose()
 
-    def pub_pose(self):
-        pose = PoseStamped()
-        pose.header.frame_id = self.robot_name + '/map'
-        pose.header.stamp = rospy.Time.now()
-        pose.pose.position.x = self.goal_x
-        pose.pose.position.y = self.goal_y
-        pose.pose.orientation.z = self.goal_angz # z=sin(yaw/2)
-        pose.pose.orientation.w = self.goal_w # w=cos(yaw/2)
-        self.goal_pub.publish(pose)
+        pose.position.x = self.goal_x
+        pose.position.y = self.goal_y
+        pose.position.z = 0
+        pose.orientation.x = 0
+        pose.orientation.y = 0
+        pose.orientation.z = self.goal_angz
+        pose.orientation.w = self.goal_w
+        return pose
+
+    def create_move_base_goal(self):
+        target = PoseStamped()
+        target.header.frame_id = self.robot_name + "/map"
+        target.header.stamp = rospy.Time.now()
+        target.pose = self.create_geo_pose()
+        goal = MoveBaseGoal(target)
+        return goal
+
+    def IfReach(self, fb_):
+        fb_x = fb_.feedback.base_position.pose.position.x
+        fb_y = fb_.feedback.base_position.pose.position.y
+        dis_2 = (fb_x-self.goal_x)**2 + (fb_y-self.goal_y)**2
+        rospy.loginfo("goal_dis:%f", dis_2)
+        if dis_2 < self.goal_dis2:
+            return True
+        else:
+            return False
 
     def outside_navCallback(self, req):
     	# 显示请求数据
@@ -55,13 +76,10 @@ class OutsideNavServer:
         rospy.sleep(8)
         
         rospy.loginfo("Goal1 send!!!x:[%f] y[%f]", self.goal_x, self.goal_y)
-        self.pub_pose()
+        self.ac_move_base.send_goal(self.create_move_base_goal())
         while not rospy.is_shutdown():
-            rospy.loginfo("debug1::::::::::::::::::!")
-            res = rospy.wait_for_message(self.robot_name + '/move_base/result', MoveBaseActionResult)       
-            rospy.loginfo("debug2::::::::::::::::::!")
-            if res.status.status == 3:
-                rospy.loginfo("debug3::::::::::::::::::!")
+            fb = rospy.wait_for_message(self.robot_name + '/move_base/feedback', MoveBaseActionFeedback)          
+            if self.IfReach(fb):
                 break
             rospy.sleep(1)
         
@@ -73,7 +91,6 @@ class OutsideNavServer:
         #         outside_nav_process.terminate()
         #     rospy.sleep(1)
         # rospy.loginfo("state:::::::::::::::::::::::::::::::::::::;%d", GoalStatus.SUCCEEDED)  
-        rospy.loginfo("debug4::::::::::::::::::!")
        
         # self._ac_move_base.wait_for_result()
         # result = self._ac_move_base.get_result()
@@ -81,32 +98,40 @@ class OutsideNavServer:
         # rospy.loginfo("else::::::::::::::::::!")
         # state = self.ac_move_base.get_state()  
         # if state == GoalStatus.SUCCEEDED:  
-        rospy.loginfo("Goal succeeded!")  
+        rospy.loginfo("Goal1 succeeded!")  
+        self.ac_move_base.cancel_goal()
+        rospy.loginfo("Goal1 canceled!")
+        rospy.sleep(2)
         # rospy.loginfo("Goal 1 reached!!!!")  
         self.move_cmd.angular.z = -0.5
         self.cmd_vel.publish(self.move_cmd)
-        rospy.sleep(6)
+        rospy.loginfo("turn right...")
+        rospy.sleep(5)
         self.move_cmd.angular.z = 0
         self.cmd_vel.publish(self.move_cmd)
+        rospy.loginfo("stop!")
         
         self.goal_x = 0.18
-        self.goal_y = -7.7
+        self.goal_y = -7.75
         self.goal_angz = 1
         self.goal_w = 0
         rospy.loginfo("Goal2 send!!!x:[%f] y[%f]", self.goal_x, self.goal_y)
-        self.pub_pose()
+        self.ac_move_base.send_goal(self.create_move_base_goal())
         while not rospy.is_shutdown():
-            res = rospy.wait_for_message(self.robot_name + '/move_base/result', MoveBaseActionResult)       
-            rospy.loginfo(res.status.status)
-            if res.status.status == 3:
+            fb = rospy.wait_for_message(self.robot_name + '/move_base/feedback', MoveBaseActionFeedback)       
+            if self.IfReach(fb):
                 break
             rospy.sleep(1)
+        rospy.loginfo("Goal2 succeeded!")
+        rospy.sleep(1)  
+        self.ac_move_base.cancel_goal()  
+        outside_nav_process.terminate()
+        rospy.loginfo("Nav node closed!")
     	# # 反馈数据
-        rospy.loginfo("out::::::::::::::::::!")
         return outside_navResponse(True)
         
 
 if __name__ == "__main__":
     rospy.init_node('outside_nav_server_node')
-    outside_nav_server = OutsideNavServer("panda")
+    outside_nav_server = OutsideNavServer("panda", 0.3)
     rospy.spin()

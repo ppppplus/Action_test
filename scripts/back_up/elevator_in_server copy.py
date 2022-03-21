@@ -20,7 +20,6 @@ class ElevatorServer:
         self.cmd_vel = rospy.Publisher(self.robot_name + '/cmd_vel', Twist, queue_size=10)
         self.move_cmd = Twist()
         self.inside_flag = False
-        self.scan_ = LaserScan()
         rospy.Service('/elevator', elevator, self.elevatorCallback)
 
     def avg(self, list_):
@@ -34,8 +33,8 @@ class ElevatorServer:
         avg_ = sum_/count
         return avg_
 
-    def laserCallback(self):
-        dis_avg = self.avg(list(self.scan_.ranges)[814:914])
+    def laserCallback(self, msg):
+        dis_avg = self.avg(list(msg.ranges)[814:914])
         self.start_list.append(dis_avg)
         # rospy.loginfo("start_list_len:%d", len(start_list))
         if not self.ele_in_flag:
@@ -55,9 +54,9 @@ class ElevatorServer:
                 self.ele_in_flag = True
                 rospy.sleep(5)
         else: 
-            dis_temp = self.avg(list(self.scan_.ranges)[238:338])
+            dis_temp = self.avg(list(msg.ranges)[238:338])
             if self.door_close:
-                dis_temp = self.avg(list(self.scan_.ranges)[238:338])
+                dis_temp = self.avg(list(msg.ranges)[238:338])
                 if dis_temp > 2:
                     self.move_cmd.linear.x = -0.3
                     rospy.sleep(2)
@@ -67,7 +66,7 @@ class ElevatorServer:
                     self.move_cmd.linear.x = 0
                     self.move_cmd.angular.z = 0.5
                     self.cmd_vel.publish(self.move_cmd)
-                    rospy.sleep(14)
+                    rospy.sleep(16)
                     self.move_cmd.angular.z = 0
                     self.cmd_vel.publish(self.move_cmd)
                     self.inside_flag = True
@@ -77,13 +76,7 @@ class ElevatorServer:
                 self.door_close = True
 
     def elevatorCallback(self, req):
-        # rospy.Subscriber(self.robot_name + "/scan", LaserScan, self.laserCallback)
-        while not rospy.is_shutdown():
-            if self.inside_flag:
-                break
-            self.scan_ = rospy.wait_for_message(self.robot_name + '/scan', LaserScan)       
-            self.laserCallback()
-            rospy.sleep(1)
+        rospy.Subscriber(self.robot_name + "/scan", LaserScan, self.laserCallback)
         return elevatorResponse(True) 
 
 if __name__=='__main__':

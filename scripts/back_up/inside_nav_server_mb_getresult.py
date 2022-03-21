@@ -6,7 +6,7 @@ import rospy
 import actionlib  
 from actionlib_msgs.msg import *  
 from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, PoseStamped, Twist
-from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseActionFeedback
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseStatus
 from action_panda.srv import *
 import os
 import subprocess
@@ -15,9 +15,8 @@ import math
 
 class InsideNavServer:
 
-    def __init__(self, robot_name, goal_tole):
+    def __init__(self, robot_name):
         self.robot_name = robot_name
-        self.goal_dis2 = goal_tole**2
         self.goal_x = 2.83
         self.goal_y = 0
         self.goal_angz = 0
@@ -37,16 +36,6 @@ class InsideNavServer:
         pose.pose.orientation.z = self.goal_angz # z=sin(yaw/2)
         pose.pose.orientation.w = self.goal_w # w=cos(yaw/2)
         self.goal_pub.publish(pose)
-
-    def IfReach(self, fb_):
-        fb_x = fb_.feedback.base_position.pose.position.x
-        fb_y = fb_.feedback.base_position.pose.position.y
-        dis_2 = (fb_x-self.goal_x)**2 + (fb_y-self.goal_y)**2
-        rospy.loginfo("goal_dis:%f", dis_2)
-        if dis_2 < self.goal_dis2:
-            return True
-        else:
-            return False
 
     def inside_navCallback(self, req):
     	# 显示请求数据
@@ -68,8 +57,9 @@ class InsideNavServer:
         rospy.loginfo("Goal1 send!!!x:[%f] y[%f]", self.goal_x, self.goal_y)
         self.pub_pose()
         while not rospy.is_shutdown():
-            fb = rospy.wait_for_message(self.robot_name + '/move_base/feedback', MoveBaseActionFeedback)       
-            if self.IfReach(fb):
+            res = rospy.wait_for_message(self.robot_name + '/move_base/status', GoalStatusArray)       
+            rospy.loginfo(res.status_list[0].status)
+            if res.status_list and res.status_list[0].status == 3:
                 break
             rospy.sleep(1)
         
@@ -91,5 +81,5 @@ class InsideNavServer:
 
 if __name__ == "__main__":
     rospy.init_node('inside_nav_server_node')
-    inside_nav_server = InsideNavServer("panda", 0.3)
+    inside_nav_server = InsideNavServer("panda")
     rospy.spin()

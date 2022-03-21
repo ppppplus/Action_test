@@ -61,6 +61,7 @@ add_service_files(
   outside_nav_reset.srv
   inside_nav.srv
   outside_nav.srv
+  elevator.srv
 )
 
 ## Generate actions in the 'action' folder

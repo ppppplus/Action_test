@@ -81,22 +81,22 @@ def main():
 			ServiceState('outside_nav',
 			outside_nav,
 			request_cb = outside_nav_request_cb),
-			transitions={'succeeded':'succeeded','aborted':'aborted','preempted':'preempted'}
+			transitions={'succeeded':'ELEVATOR'}
 		 	)
 
-		# smach.StateMachine.add('ELEVATOR',
-		# 	ServiceState('elevator',
-		# 	elevator,
-		# 	request_cb = elevator_request_cb),
-		# 	transitions={'succeeded':'INSIDE_NAV'}
-		# 	)
+		smach.StateMachine.add('ELEVATOR',
+			ServiceState('elevator',
+			elevator,
+			request_cb = elevator_request_cb),
+			transitions={'succeeded':'INSIDE_NAV'}
+			)
 
-		# smach.StateMachine.add('INSIDE_NAV',
-		# 	ServiceState('inside_nav',
-		# 	inside_nav,
-		# 	request_cb = inside_nav_request_cb),
-		# 	transitions={'succeeded':'succeeded','aborted':'aborted','preempted':'preempted'}
-		# 	)
+		smach.StateMachine.add('INSIDE_NAV',
+			ServiceState('inside_nav',
+			inside_nav,
+			request_cb = inside_nav_request_cb),
+			transitions={'succeeded':'succeeded','aborted':'aborted','preempted':'preempted'}
+			)
 
 	# start  introspection server to use smach_viewr.p
 	sis = smach_ros.IntrospectionServer('server_name',sm_root,'/SM_ROOT')
