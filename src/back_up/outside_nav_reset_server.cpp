@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     cmd_pub = n.advertise<geometry_msgs::Twist>("/panda/cmd_vel", 1);
     ros::ServiceServer service = n.advertiseService("outside_nav_reset", execute);
-    ROS_INFO("outside_nav_reset_server start.");
+    ROS_WARN("Outside_nav_reset_server(action) ready!");
     if(back_flag)
         ros::shutdown();
 

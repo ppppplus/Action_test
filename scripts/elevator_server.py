@@ -21,6 +21,7 @@ class ElevatorServer:
         self.move_cmd = Twist()
         self.inside_flag = False
         self.scan_ = LaserScan()
+        rospy.logwarn("Elevator_server ready!")
         rospy.Service('/elevator', elevator, self.elevatorCallback)
 
     def avg(self, list_):

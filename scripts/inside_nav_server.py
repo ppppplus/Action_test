@@ -22,21 +22,30 @@ class InsideNavServer:
         self.goal_y = 0
         self.goal_angz = 0
         self.goal_w = 1
-        self.goal_pub = rospy.Publisher(self.robot_name + '/move_base_simple/goal', PoseStamped, queue_size = 1)
+        self.ac_move_base = actionlib.SimpleActionClient("/" + self.robot_name + "/move_base", MoveBaseAction)  
         self.cmd_vel = rospy.Publisher(self.robot_name + '/cmd_vel', Twist, queue_size=10)
         self.move_cmd = Twist()
-
+        rospy.logwarn("Inside_nav_server ready!")
         rospy.Service('/inside_nav', inside_nav, self.inside_navCallback)
 
-    def pub_pose(self):
-        pose = PoseStamped()
-        pose.header.frame_id = self.robot_name + '/map'
-        pose.header.stamp = rospy.Time.now()
-        pose.pose.position.x = self.goal_x
-        pose.pose.position.y = self.goal_y
-        pose.pose.orientation.z = self.goal_angz # z=sin(yaw/2)
-        pose.pose.orientation.w = self.goal_w # w=cos(yaw/2)
-        self.goal_pub.publish(pose)
+    def create_geo_pose(self):
+        pose = Pose()
+        pose.position.x = self.goal_x
+        pose.position.y = self.goal_y
+        pose.position.z = 0
+        pose.orientation.x = 0
+        pose.orientation.y = 0
+        pose.orientation.z = self.goal_angz
+        pose.orientation.w = self.goal_w
+        return pose
+
+    def create_move_base_goal(self):
+        target = PoseStamped()
+        target.header.frame_id = self.robot_name + "/map"
+        target.header.stamp = rospy.Time.now()
+        target.pose = self.create_geo_pose()
+        goal = MoveBaseGoal(target)
+        return goal
 
     def IfReach(self, fb_):
         fb_x = fb_.feedback.base_position.pose.position.x
@@ -48,25 +57,26 @@ class InsideNavServer:
         else:
             return False
 
+    def CarMove(self, t_):
+        self.cmd_vel.publish(self.move_cmd)
+        rospy.sleep(t_)
+        self.move_cmd.linear.x = 0
+        self.move_cmd.angular.z = 0
+        self.cmd_vel.publish(self.move_cmd) # stop
+
     def inside_navCallback(self, req):
-    	# 显示请求数据
-        # uuid = roslaunch.rlutil.get_or_generate_uuid(None, False)
-        # roslaunch.configure_logging(uuid)
-        # launch = roslaunch.parent.ROSLaunchParent(uuid, ["/home/nics/panda_ws/src/segwayrmp/launch/trans/move_base_map.launch"])
-        # launch.start()
-        # subprocess.call (["roslaunch segwayrmp move_base_map.launch"],shell=True)
+        rospy.logwarn("car_id:%d", req.car_id)
         inside_nav_process = subprocess.Popen(['bash', '-c', 'roslaunch segwayrmp move_base_map_inside.launch'])
-    
-        rospy.loginfo("inside navgation started.")
-        # rospy.loginfo("Waiting for move_base action server...")  
+        rospy.loginfo("Inside navgation started.")
+        rospy.loginfo("Waiting for move_base action server...")  
     
         # Wait 60 seconds for the action server to become available  
-        # self.ac_move_base.wait_for_server(rospy.Duration(60)) 
-        # rospy.loginfo("move_base start!!!")
-        rospy.sleep(8)
+        self.ac_move_base.wait_for_server(rospy.Duration(60)) 
+        rospy.loginfo("move_base start!!!")
+        # rospy.sleep(8)
         
         rospy.loginfo("Goal1 send!!!x:[%f] y[%f]", self.goal_x, self.goal_y)
-        self.pub_pose()
+        self.ac_move_base.send_goal(self.create_move_base_goal())
         while not rospy.is_shutdown():
             fb = rospy.wait_for_message(self.robot_name + '/move_base/feedback', MoveBaseActionFeedback)       
             if self.IfReach(fb):
@@ -82,7 +92,8 @@ class InsideNavServer:
         #     rospy.sleep(1)
         # rospy.loginfo("state:::::::::::::::::::::::::::::::::::::;%d", GoalStatus.SUCCEEDED)  
 
-        rospy.loginfo("Goal succeeded!")  
+        rospy.loginfo("Goal1 succeeded!") 
+        self.ac_move_base.cancel_goal() 
         # rospy.loginfo("Goal 1 reached!!!!")  
         inside_nav_process.terminate()
         rospy.loginfo("Nav node closed!")
@@ -90,6 +101,6 @@ class InsideNavServer:
         
 
 if __name__ == "__main__":
-    rospy.init_node('inside_nav_server_node')
+    rospy.init_node('inside_nav_server')
     inside_nav_server = InsideNavServer("panda", 0.3)
     rospy.spin()

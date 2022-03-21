@@ -40,6 +40,7 @@ class BoxApproachAction
       action_name(name)
 
     {
+      ROS_WARN("Box_approach_server(action) ready!");
       as_.start();
     }
 

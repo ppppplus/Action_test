@@ -36,6 +36,7 @@ class BoxFocousAction
      as_(n, name, boost::bind(&BoxFocousAction::execute, this, _1), false),
      action_name(name)
     {
+      ROS_WARN("Box_focous_server(action) ready!");
       as_.start();
     }
 

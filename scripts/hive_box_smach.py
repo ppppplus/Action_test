@@ -77,12 +77,12 @@ def main():
 		# 	transitions={'succeeded':'OUTSIDE_NAV'}
 		# 	)
 
-		smach.StateMachine.add('OUTSIDE_NAV',
-			ServiceState('outside_nav',
-			outside_nav,
-			request_cb = outside_nav_request_cb),
-			transitions={'succeeded':'ELEVATOR'}
-		 	)
+		# smach.StateMachine.add('OUTSIDE_NAV',
+		# 	ServiceState('outside_nav',
+		# 	outside_nav,
+		# 	request_cb = outside_nav_request_cb),
+		# 	transitions={'succeeded':'ELEVATOR'}
+		#  	)
 
 		smach.StateMachine.add('ELEVATOR',
 			ServiceState('elevator',

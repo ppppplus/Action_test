@@ -154,17 +154,17 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
-add_executable(DoDishes_client src/DoDishes_client.cpp)
-target_link_libraries( DoDishes_client ${catkin_LIBRARIES})
-add_dependencies(DoDishes_client ${${PROJECT_NAME}_EXPORTED_TARGETS})
+# add_executable(DoDishes_client src/DoDishes_client.cpp)
+# target_link_libraries( DoDishes_client ${catkin_LIBRARIES})
+# add_dependencies(DoDishes_client ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-add_executable(DoDishes_server src/DoDishes_server.cpp)
-target_link_libraries( DoDishes_server ${catkin_LIBRARIES})
-add_dependencies(DoDishes_server ${${PROJECT_NAME}_EXPORTED_TARGETS})
+# add_executable(DoDishes_server src/DoDishes_server.cpp)
+# target_link_libraries( DoDishes_server ${catkin_LIBRARIES})
+# add_dependencies(DoDishes_server ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-add_executable(box_approach_server src/box_approach_server.cpp)
-target_link_libraries( box_approach_server ${catkin_LIBRARIES})
-add_dependencies(box_approach_server ${${PROJECT_NAME}_EXPORTED_TARGETS})
+# add_executable(box_approach_server src/box_approach_server.cpp)
+# target_link_libraries( box_approach_server ${catkin_LIBRARIES})
+# add_dependencies(box_approach_server ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 add_executable(box_approach_server_panda src/box_approach_server_panda.cpp)
 target_link_libraries( box_approach_server_panda ${catkin_LIBRARIES})
@@ -174,17 +174,17 @@ add_executable(box_focous_server_panda src/box_focous_server_panda.cpp)
 target_link_libraries( box_focous_server_panda ${catkin_LIBRARIES})
 add_dependencies(box_focous_server_panda ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-add_executable(outside_nav_reset_server src/outside_nav_reset_server.cpp)
-target_link_libraries( outside_nav_reset_server ${catkin_LIBRARIES})
-add_dependencies(outside_nav_reset_server ${${PROJECT_NAME}_EXPORTED_TARGETS})
+# add_executable(outside_nav_reset_server src/outside_nav_reset_server.cpp)
+# target_link_libraries( outside_nav_reset_server ${catkin_LIBRARIES})
+# add_dependencies(outside_nav_reset_server ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-add_executable(box_focous_server src/box_focous_server.cpp)
-target_link_libraries( box_focous_server ${catkin_LIBRARIES})
-add_dependencies(box_focous_server ${${PROJECT_NAME}_EXPORTED_TARGETS})
+# add_executable(box_focous_server src/box_focous_server.cpp)
+# target_link_libraries( box_focous_server ${catkin_LIBRARIES})
+# add_dependencies(box_focous_server ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-add_executable(box_approach_client src/box_approach_client.cpp)
-target_link_libraries( box_approach_client ${catkin_LIBRARIES})
-add_dependencies(box_approach_client ${${PROJECT_NAME}_EXPORTED_TARGETS})
+# add_executable(box_approach_client src/box_approach_client.cpp)
+# target_link_libraries( box_approach_client ${catkin_LIBRARIES})
+# add_dependencies(box_approach_client ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 #############
 ## Install ##
