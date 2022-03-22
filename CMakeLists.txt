@@ -11,8 +11,11 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
   roscpp
+  rospy
+  message_generation
   std_srvs
   segwayrmp
+  segway_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -49,11 +52,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  health_status.msg
+  running_status.msg
+)
 
 ## Generate services in the 'srv' folder
 add_service_files(
@@ -62,6 +65,8 @@ add_service_files(
   inside_nav.srv
   outside_nav.srv
   elevator.srv
+  task_info.srv
+  box_control.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -110,7 +115,7 @@ find_package(catkin REQUIRED genmsg actionlib_msgs actionlib)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  LIBRARIES action_panda
- CATKIN_DEPENDS actionlib actionlib_msgs roscpp rospy
+ CATKIN_DEPENDS actionlib actionlib_msgs roscpp rospy message_runtime segway_msgs
 )
 
 ###########
@@ -173,6 +178,14 @@ add_dependencies(box_approach_server_panda ${${PROJECT_NAME}_EXPORTED_TARGETS})
 add_executable(box_focous_server_panda src/box_focous_server_panda.cpp)
 target_link_libraries( box_focous_server_panda ${catkin_LIBRARIES})
 add_dependencies(box_focous_server_panda ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+add_executable(health_status_pub src/health_status_pub.cpp)
+target_link_libraries( health_status_pub ${catkin_LIBRARIES})
+add_dependencies(health_status_pub ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+add_executable(running_status_pub src/running_status_pub.cpp)
+target_link_libraries( running_status_pub ${catkin_LIBRARIES})
+add_dependencies(running_status_pub ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 # add_executable(outside_nav_reset_server src/outside_nav_reset_server.cpp)
 # target_link_libraries( outside_nav_reset_server ${catkin_LIBRARIES})

@@ -1,0 +1,12 @@
+string seqId
+int64 actionTime
+string deviceId
+int64 statusType
+string statusDesc
+string triggerByCmd
+string orderId
+string outdoorX
+string outdoorY
+string floorNo
+string indoorX
+string indoorY

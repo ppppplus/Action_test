@@ -22,6 +22,7 @@ class BoxFocousAction
     bool if_focous = false;
     int first_rot = 1;
     std::string action_name;
+    std::string robot_name;
 
     ros::NodeHandle n;
     ros::Publisher cmd_pub;
@@ -33,6 +34,7 @@ class BoxFocousAction
 
   public:
     BoxFocousAction(std::string name):
+     n.param("~robot_name", robot_name, "panda")
      as_(n, name, boost::bind(&BoxFocousAction::execute, this, _1), false),
      action_name(name)
     {
@@ -123,7 +125,7 @@ class BoxFocousAction
       ROS_INFO("foc car_id:%d", goal->car_id);
       first_rot = goal->first_rot;
       ROS_INFO("first_rot:%d", first_rot);
-      cmd_pub = n.advertise<geometry_msgs::Twist>("/panda/cmd_vel", 1);
+      cmd_pub = n.advertise<geometry_msgs::Twist>(robot_name + "/cmd_vel", 1);
       while (ros::ok())
       {
         msg = ros::topic::waitForMessage<geometry_msgs::PoseStamped>("/aruco_single/pose", ros::Duration(5));

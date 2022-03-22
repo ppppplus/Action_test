@@ -66,6 +66,8 @@ class InsideNavServer:
 
     def inside_navCallback(self, req):
         rospy.logwarn("car_id:%d", req.car_id)
+        # self.goal_x = req.goal_x
+        # self.goal_y = req.goal_y
         inside_nav_process = subprocess.Popen(['bash', '-c', 'roslaunch segwayrmp move_base_map_inside.launch'])
         rospy.loginfo("Inside navgation started.")
         rospy.loginfo("Waiting for move_base action server...")  
@@ -102,5 +104,7 @@ class InsideNavServer:
 
 if __name__ == "__main__":
     rospy.init_node('inside_nav_server')
-    inside_nav_server = InsideNavServer("panda", 0.3)
+    robot_name = rospy.get_param('~robot_name', 'panda')
+    xy_tole = rospy.get_param("~xy_tole", 0.3)
+    inside_nav_server = InsideNavServer(robot_name, xy_tole)
     rospy.spin()

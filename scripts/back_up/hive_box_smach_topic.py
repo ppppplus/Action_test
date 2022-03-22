@@ -28,16 +28,10 @@ def main():
 
 	with sm_root:
 
-		def task_info_request_cb(userdata, request):
-			task_info_request = task_infoRequest()
-			task_info_request.ready = True
-			return task_info_request
-		
-		def task_info_response_cb(userdata, response):
-			if response.type == "delivery":
-				userdata.picX = response.indoorX
-				userdata.picY = response.indoorY	# 均为像素坐标
-				rospy.loginfo("Receive pic point:x[%s] y[%s]", userdata.picX, userdata.picY)
+		def ready_monitor_cb(userdata, msg):
+			if msg.type == "delivery":
+				userdata.indoorX = msg.indoorX
+				userdata.indoorY = msg.indoorY
 				return 'valid'
 			else:
 				return 'invalid'
@@ -77,13 +71,11 @@ def main():
 			inside_nav_request.goal_y = userdata.indoorY
 			return inside_nav_request
 
-		smach.StateMachine.add('DELIVERY_READY',
-			ServiceState('task_info',
-			task_info,
-			request_cb = task_info_request_cb,
-			result_cb = task_info_response_cb),
-			transitions={'invalid':'DELIVERY_READY', 'valid':'BOX_APPROACH', 'preempted':'DELIVERY_READY'}
-			)
+		smach.StateMachine.add('DELIVERY_READY', 
+			smach_ros.MonitorState("task_info", 
+			task_info, 
+			ready_monitor_cb), 
+			transitions={'invalid':'DELIVERY_READY', 'valid':'BOX_APPROACH', 'preempted':'DELIVERY_READY'})
         
 		# smach.StateMachine.add('BOX_APPROACH', 
 		# SimpleActionState('box_approach',box_approachAction,

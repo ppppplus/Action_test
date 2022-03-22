@@ -89,7 +89,8 @@ class ElevatorServer:
 
 if __name__=='__main__':
     rospy.init_node('elevator_server', anonymous=True)
-    elevator_server = ElevatorServer("panda")
+    robot_name = rospy.get_param('~robot_name', 'panda')
+    elevator_server = ElevatorServer(robot_name)
     rospy.spin()
  
  

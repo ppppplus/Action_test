@@ -122,5 +122,7 @@ class OutsideNavServer:
 
 if __name__ == "__main__":
     rospy.init_node('outside_nav_server')
-    outside_nav_server = OutsideNavServer("panda", 0.3)
+    robot_name = rospy.get_param('~robot_name', 'panda')
+    xy_tole = rospy.get_param("~xy_tole", 0.3)
+    outside_nav_server = OutsideNavServer(robot_name, xy_tole)
     rospy.spin()

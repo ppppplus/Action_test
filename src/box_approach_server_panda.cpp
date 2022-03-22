@@ -23,6 +23,7 @@ class BoxApproachAction
     int first_rot;
     float goal_x, goal_y, goal_yaw;
     std::string action_name;
+    std::string robot_name;
     
     ros::NodeHandle n;
     ros::Publisher cmd_pub;
@@ -36,9 +37,9 @@ class BoxApproachAction
 
   public:
     BoxApproachAction(std::string name):
-      as_(n, name, boost::bind(&BoxApproachAction::execute, this, _1), false),
+      n.param("~robot_name", robot_name, "panda")
       action_name(name)
-
+      as_(n, name, boost::bind(&BoxApproachAction::execute, this, _1), false),
     {
       ROS_WARN("Box_approach_server(action) ready!");
       as_.start();
@@ -65,7 +66,7 @@ class BoxApproachAction
 
     bool send_goal(float x, float z, float pitch)
     {
-      MoveBaseClient mc_("panda/move_base", true);
+      MoveBaseClient mc_(robot_name + "/move_base", true);
 
       //wait for the action server to come up
       while(!mc_.waitForServer(ros::Duration(5.0))){
@@ -77,7 +78,7 @@ class BoxApproachAction
       move_base_msgs::MoveBaseGoal goal;
 
       //we'll send a goal to the robot to move 1 meter forward
-      goal.target_pose.header.frame_id = "panda/base_link";
+      goal.target_pose.header.frame_id = robot_name + "/base_link";
       goal.target_pose.header.stamp = ros::Time::now();
 
       goal.target_pose.pose.position.x = goal_x;
@@ -140,7 +141,7 @@ class BoxApproachAction
         if (msg)
         {
           BoxApproachAction::PoseCallback(msg);
-          cmd_pub = n.advertise<geometry_msgs::Twist>("/panda/cmd_vel", 1);
+          cmd_pub = n.advertise<geometry_msgs::Twist>(robot_name + "/cmd_vel", 1);
           // system("roslaunch segwayrmp carto.launch");s
           // system("roslaunch segwayrmp move_base_teb.launch");
           feedback_.detect_flag = 1;

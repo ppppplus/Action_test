@@ -1,3 +1,5 @@
 uint32 car_id
+string pic_x
+string pic_y
 ---
 bool inside_nav_flag
