@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import roslaunch
 import rospy
 import actionlib  
+import math
+import times
 from actionlib_msgs.msg import *  
 from geometry_msgs.msg import Pose, PoseWithCovarianceStamped, Point, PoseStamped, Twist
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal, MoveBaseActionFeedback
@@ -11,7 +12,7 @@ from action_panda.srv import *
 import os
 import subprocess
 from subprocess import Popen
-import math
+
 
 class OutsideNavServer:
 
@@ -65,6 +66,9 @@ class OutsideNavServer:
         self.move_cmd.angular.z = 0
         self.cmd_vel.publish(self.move_cmd) # stop
 
+    def CurrentTimeMillis(self):
+        return int(round(time.time()*1000))
+
     def outside_navCallback(self, req):
         rospy.logwarn("car_id:%d", req.car_id)
         rospy.loginfo("Outside navigation reset...")
@@ -72,6 +76,16 @@ class OutsideNavServer:
         self.CarMove(2)
         self.move_cmd.angular.z = 0.5
         self.CarMove(6)
+        rospy.wait_for_service('box_control')
+        box_close_client - rospy.ServiceProxy('box_control', box_control)
+        box_close_req = box_controlRequest()
+        box_close_req.actionTime = self.CurrentTimeMillis()
+        box_close_req.deviceId = "1"
+        box_close_req.type = "close"
+        try:
+            res = box_close_client('box_control', box_close_req)
+        except rospy.ServiceException as exc:
+            print("Service did not process request: " + str(exc))
         outside_nav_process = subprocess.Popen(['bash', '-c', 'roslaunch segwayrmp move_base_map_outside.launch'])
         rospy.loginfo("Outside navgation started.")
         rospy.loginfo("Waiting for move_base action server...")  
