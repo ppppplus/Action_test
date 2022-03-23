@@ -9,8 +9,6 @@
 #include <actionlib/server/simple_action_server.h>
 #include "action_panda/box_focousAction.h"
 
-
-
 #define ALIGNMENT_TOLERANCE_LR 0.02
 #define ALIGNMENT_TOLERANCE_FB 0.2
 #define CONFIRMATION_TIMES 10

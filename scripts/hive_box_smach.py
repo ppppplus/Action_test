@@ -38,9 +38,10 @@ def main():
 				userdata.picX = response.indoorX
 				userdata.picY = response.indoorY	# 均为像素坐标
 				rospy.loginfo("Receive pic point:x[%s] y[%s]", userdata.picX, userdata.picY)
-				return 'valid'
+				return 'succeeded'
 			else:
-				return 'invalid'
+				rospy.logwarn("Cannot receive goal!")
+				return 'aborted'
 
 		def box_approach_result_cb(userdata, status, result):
 			if status == GoalStatus.SUCCEEDED:
@@ -73,8 +74,8 @@ def main():
 		def inside_nav_request_cb(userdata, request):
 			inside_nav_request = inside_navRequest()
 			inside_nav_request.car_id = 1
-			inside_nav_request.goal_x = userdata.indoorX
-			inside_nav_request.goal_y = userdata.indoorY
+			inside_nav_request.pic_x = userdata.picX
+			inside_nav_request.pic_y = userdata.picY
 			return inside_nav_request
 
 		smach.StateMachine.add('DELIVERY_READY',
@@ -82,7 +83,7 @@ def main():
 			task_info,
 			request_cb = task_info_request_cb,
 			result_cb = task_info_response_cb),
-			transitions={'invalid':'DELIVERY_READY', 'valid':'BOX_APPROACH', 'preempted':'DELIVERY_READY'}
+			transitions={'succeeded':'BOX_APPROACH', 'aborted':'aborted', 'preempted':'DELIVERY_READY'}
 			)
         
 		# smach.StateMachine.add('BOX_APPROACH', 
@@ -126,7 +127,7 @@ def main():
 			ServiceState('inside_nav',
 			inside_nav,
 			request_cb = inside_nav_request_cb,
-			input_keys=['indoorX', 'indoorY']),
+			input_keys=['picX', 'picY']),
 			transitions={'succeeded':'succeeded','aborted':'aborted','preempted':'preempted'}
 			)
 

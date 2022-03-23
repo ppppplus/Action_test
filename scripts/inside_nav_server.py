@@ -13,6 +13,8 @@ import subprocess
 from subprocess import Popen
 import math
 
+point_dict = {('1170','180'):(2.83,0,0,1), ('680','1220'):(3,1,0,1)}
+
 class InsideNavServer:
 
     def __init__(self, robot_name, goal_tole):
@@ -66,8 +68,11 @@ class InsideNavServer:
 
     def inside_navCallback(self, req):
         rospy.logwarn("car_id:%d", req.car_id)
-        # self.goal_x = req.goal_x
-        # self.goal_y = req.goal_y
+
+        goal_point = point_dict[(req.picX, req.picY)]
+        (self.goal_x, self.goal_y, self.goal_angz, self.goal_w) = goal_point
+        rospy.loginfo("Get goal from client:x[%f], y[%f]", self.goal_x, self.goal_y)
+
         inside_nav_process = subprocess.Popen(['bash', '-c', 'roslaunch segwayrmp move_base_map_inside.launch'])
         rospy.loginfo("Inside navgation started.")
         rospy.loginfo("Waiting for move_base action server...")  
